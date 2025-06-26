@@ -11,7 +11,12 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <!-- jsPDF-AutoTable plugin for table support -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.autotable.min.js"></script>
-  <style>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+  }
+</script>  
+<style>
     /* Keyframe Animations */
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
@@ -47,6 +52,7 @@
         document.documentElement.classList.remove('dark')
     }
   </script>
+
 </head>
 
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 font-sans transition-colors duration-500">
