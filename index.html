@@ -292,34 +292,57 @@
       }
 
       function generatePdf() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        const isDark = document.documentElement.classList.contains('dark');
-        
-        doc.text("Data Safety Report", 14, 16);
-        
-        const table = document.getElementById('resultsTable');
-        if (table.querySelector('#questionForm td[colspan="6"]')) {
-            doc.text("No SDKs selected.", 14, 25);
-        } else {
-             doc.autoTable({
-                html: '#resultsTable',
-                startY: 22,
-                theme: 'grid',
-                headStyles: { fillColor: isDark ? [45, 55, 72] : [243, 244, 246] },
-                styles: {
-                    textColor: isDark ? [229, 231, 235] : [17, 24, 39],
-                    cellPadding: 2,
-                    fontSize: 8
-                },
-                bodyStyles: {
-                    fillColor: isDark ? [31, 41, 55] : [255, 255, 255]
-                }
-             });
-        }
-       
-        doc.save('data_safety_report.pdf');
-      }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const isDark = document.documentElement.classList.contains('dark');
+
+    doc.setFontSize(14);
+    doc.text("Data Safety Report", 14, 16);
+
+    const tableBody = [];
+    const rows = document.querySelectorAll('#questionForm tr');
+
+    rows.forEach(row => {
+        const cells = Array.from(row.querySelectorAll('td'));
+
+        // Skip placeholder row when no SDKs are selected
+        if (cells.length === 1 && cells[0].colSpan === 6) return;
+
+        const rowData = [
+            cells[0].textContent.trim(), // Data Type
+            cells[1].innerHTML.includes('text-green-500') ? 'Yes' : 'No', // Collected
+            cells[2].innerHTML.includes('text-green-500') ? 'Yes' : 'No', // Shared
+            cells[3].innerHTML.includes('text-green-500') ? 'Yes' : 'No', // Ephemeral
+            cells[4].innerHTML.includes('text-green-500') ? 'Yes' : 'No', // Optional
+            cells[5].textContent.trim()  // Purposes
+        ];
+        tableBody.push(rowData);
+    });
+
+    if (tableBody.length === 0) {
+        doc.setFontSize(12);
+        doc.text("No SDKs selected.", 14, 30);
+    } else {
+        doc.autoTable({
+            startY: 22,
+            head: [['Data Type', 'Collected', 'Shared', 'Ephemeral', 'Optional', 'Purposes']],
+            body: tableBody,
+            theme: 'grid',
+            headStyles: { fillColor: isDark ? [45, 55, 72] : [243, 244, 246] },
+            styles: {
+                textColor: isDark ? [229, 231, 235] : [17, 24, 39],
+                fontSize: 8,
+                cellPadding: 2,
+            },
+            bodyStyles: {
+                fillColor: isDark ? [31, 41, 55] : [255, 255, 255]
+            }
+        });
+    }
+
+    doc.save('data_safety_report.pdf');
+  }
+
 
       toStep2Btn.addEventListener('click', () => {
         buildTable();
