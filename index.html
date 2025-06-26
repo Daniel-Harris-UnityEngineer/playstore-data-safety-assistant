@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,168 +9,328 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- jsPDF for PDF export -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- jsPDF-AutoTable plugin for table support -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.autotable.min.js"></script>
+  <style>
+    /* Keyframe Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.5s ease-out forwards;
+    }
+    @keyframes gradient-pan {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    .animated-gradient {
+        background-size: 200% 200%;
+        animation: gradient-pan 5s ease infinite;
+    }
+    /* Juicy Checkbox Style */
+    .juicy-checkbox:checked {
+        animation: pop 0.3s ease-out;
+    }
+    @keyframes pop {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+    }
+  </style>
+  <script>
+    // Set theme on initial load
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark')
+    } else {
+        document.documentElement.classList.remove('dark')
+    }
+  </script>
 </head>
-<body class="bg-gradient-to-br from-blue-50 to-purple-50 text-gray-800">
-  <div class="max-w-4xl mx-auto p-6">
-    <h1 class="text-4xl font-extrabold mb-8 text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 animate-pulse">Data Safety Assistant</h1>
+
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 font-sans transition-colors duration-500">
+  
+  <div class="absolute top-4 right-4 z-10">
+      <button id="theme-toggle" class="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-900 transition-all duration-300">
+          <svg id="theme-icon-light" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+          <svg id="theme-icon-dark" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+      </button>
+  </div>
+  
+  <div class="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">
+    <h1 class="text-4xl md:text-5xl font-extrabold mb-8 text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 animated-gradient">
+      Data Safety Assistant
+    </h1>
+    <p class="text-center text-gray-600 dark:text-gray-400 mb-10 -mt-6">Select the SDKs used in your app to generate a preliminary data safety report.</p>
 
     <!-- Step 1: Service Selection -->
-    <section id="step1" class="bg-white bg-opacity-80 p-6 rounded-2xl shadow-lg transition-transform transform hover:scale-105">
-      <h2 class="text-2xl font-semibold mb-4">1. Select SDKs/Services</h2>
-      <div class="grid grid-cols-2 gap-4">
-        <!-- SDK checkboxes -->
-        <label class="flex items-center"><input type="checkbox" class="service-checkbox mr-2" value="unity_ads" />Unity Ads</label>
-        <label class="flex items-center"><input type="checkbox" class="service-checkbox mr-2" value="admob" />Google AdMob</label>
-        <label class="flex items-center"><input type="checkbox" class="service-checkbox mr-2" value="crashlytics" />Firebase Crashlytics</label>
-        <label class="flex items-center"><input type="checkbox" class="service-checkbox mr-2" value="facebook_login" />Facebook Login SDK</label>
-        <label class="flex items-center"><input type="checkbox" class="service-checkbox mr-2" value="facebook_analytics" />Facebook Analytics SDK</label>
-        <label class="flex items-center"><input type="checkbox" class="service-checkbox mr-2" value="flurry" />Flurry Analytics</label>
-        <label class="flex items-center"><input type="checkbox" class="service-checkbox mr-2" value="intercom" />Intercom</label>
-        <label class="flex items-center"><input type="checkbox" class="service-checkbox mr-2" value="mixpanel" />Mixpanel</label>
-        <label class="flex items-center"><input type="checkbox" class="service-checkbox mr-2" value="stripe" />Stripe SDK</label>
-        <label class="flex items-center"><input type="checkbox" class="service-checkbox mr-2" value="iap" />Google Play IAP</label>
+    <section id="step1" class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg transition-shadow">
+      <h2 class="text-2xl font-bold mb-6 text-gray-700 dark:text-gray-200">1. Select SDKs & Services</h2>
+      <div id="sdk-selection-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        <!-- SDK checkboxes will be dynamically inserted here -->
       </div>
-      <button id="toStep2" class="mt-6 w-full py-2 rounded-2xl bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold hover:from-purple-500 hover:to-blue-500 transition-colors">Next</button>
+      <button id="toStep2" class="mt-8 w-full py-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-blue-500/50 dark:hover:shadow-blue-400/30 transform hover:-translate-y-1 active:scale-95">
+        Generate Report
+      </button>
     </section>
 
-    <!-- Step 2: Questionnaire -->
-    <section id="step2" class="hidden bg-white bg-opacity-80 p-6 rounded-2xl shadow-lg mt-6 animate-fade-in">
-      <h2 class="text-2xl font-semibold mb-4">2. Data Safety Details</h2>
-      <div class="overflow-x-auto">
-        <table class="min-w-full table-auto">
-          <thead>
-            <tr class="bg-gradient-to-r from-blue-100 to-purple-100">
-              <th class="px-4 py-2">Data Type</th>
-              <th class="px-4 py-2">Collected</th>
-              <th class="px-4 py-2">Shared</th>
-              <th class="px-4 py-2">Processed Ephemerally?</th>
-              <th class="px-4 py-2">Required?</th>
-              <th class="px-4 py-2">Purposes</th>
+    <!-- Step 2: Questionnaire & Results -->
+    <section id="step2" class="hidden bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg mt-8 animate-fade-in">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-bold text-gray-700 dark:text-gray-200">2. Data Safety Details</h2>
+        <button id="backToStep1" class="text-sm text-blue-600 dark:text-blue-400 hover:underline">← Back to SDK Selection</button>
+      </div>
+      <p class="mb-6 text-gray-600 dark:text-gray-400">This table is automatically generated based on your selections. It summarizes the data types collected and shared by the chosen SDKs. This is for guidance only and should be verified.</p>
+      <div class="overflow-x-auto border border-gray-200 dark:border-gray-700 rounded-lg">
+        <table id="resultsTable" class="min-w-full table-auto text-sm">
+          <thead class="bg-gray-50 dark:bg-gray-700/50">
+            <tr>
+              <th class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300">Data Type</th>
+              <th class="px-4 py-3 text-center font-semibold text-gray-600 dark:text-gray-300">Collected</th>
+              <th class="px-4 py-3 text-center font-semibold text-gray-600 dark:text-gray-300">Shared</th>
+              <th class="px-4 py-3 text-center font-semibold text-gray-600 dark:text-gray-300">Ephemeral</th>
+              <th class="px-4 py-3 text-center font-semibold text-gray-600 dark:text-gray-300">Optional</th>
+              <th class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300">Purposes</th>
             </tr>
           </thead>
-          <tbody id="questionForm"></tbody>
+          <tbody id="questionForm" class="divide-y divide-gray-200 dark:divide-gray-700">
+            <!-- Table content will be dynamically generated here -->
+          </tbody>
         </table>
       </div>
-      <div class="mt-6 grid grid-cols-3 gap-4">
-        <button id="generate" class="py-2 rounded-2xl bg-green-500 text-white font-semibold hover:bg-green-600 transition-colors">Generate</button>
-        <button id="exportCsv" class="py-2 rounded-2xl bg-yellow-500 text-white font-semibold hover:bg-yellow-600 transition-colors">Export CSV</button>
-        <button id="exportPdf" class="py-2 rounded-2xl bg-red-500 text-white font-semibold hover:bg-red-600 transition-colors">Export PDF</button>
+      <div class="mt-6 flex flex-wrap gap-4 justify-end">
+        <button id="exportCsv" class="py-2 px-5 rounded-lg bg-green-500 text-white font-semibold transition-all duration-300 shadow-sm hover:shadow-md hover:shadow-green-500/50 dark:hover:shadow-green-400/30 transform hover:-translate-y-0.5 active:scale-95">Export CSV</button>
+        <button id="exportPdf" class="py-2 px-5 rounded-lg bg-red-500 text-white font-semibold transition-all duration-300 shadow-sm hover:shadow-md hover:shadow-red-500/50 dark:hover:shadow-red-400/30 transform hover:-translate-y-0.5 active:scale-95">Export PDF</button>
       </div>
     </section>
 
-    <!-- Step 3: Output -->
-    <section id="step3" class="hidden bg-white bg-opacity-80 p-6 rounded-2xl shadow-lg mt-6 animate-fade-in">
-      <h2 class="text-2xl font-semibold mb-4">3. Your Data Safety Checklist</h2>
-      <pre id="output" class="bg-gray-50 p-4 rounded-lg overflow-x-auto"></pre>
-    </section>
   </div>
 
   <script>
-    // Fade-in animation
-    const style = document.createElement('style');
-    style.innerHTML = '@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } } .animate-fade-in { animation: fade-in 0.5s ease-in; }';
-    document.head.appendChild(style);
-
-    const dataTypeMeta = { /* same as before */
-      user_ids: {label:'User IDs', collected:true, shared:true, ephemeral:false, required:true, purposes:['Advertising','Analytics']},
-      other_info: {label:'Other info', collected:true, shared:true, ephemeral:false, required:false, purposes:['Analytics','Personalization']},
-      app_activity: {label:'App activity', collected:true, shared:true, ephemeral:true, required:true, purposes:['Analytics']},
-      app_interactions: {label:'App interactions', collected:true, shared:true, ephemeral:true, required:false, purposes:['Advertising']},
-      other_actions: {label:'Other actions', collected:true, shared:true, ephemeral:true, required:false, purposes:['Engagement']},
-      crash_logs: {label:'Crash logs', collected:true, shared:true, ephemeral:false, required:false, purposes:['Performance']},
-      diagnostics: {label:'Diagnostics', collected:true, shared:true, ephemeral:false, required:false, purposes:['Bug fixing']},
-      device_ids: {label:'Device or other IDs', collected:true, shared:true, ephemeral:false, required:true, purposes:['Advertising','Fraud prevention']},
-      purchase_history: {label:'Purchase history', collected:true, shared:false, ephemeral:false, required:true, purposes:['Functionality']},
-      in_app_search_history: {label:'In-app search history', collected:false, shared:false, ephemeral:false, required:false, purposes:[]},
-      email_address: {label:'Email address', collected:false, shared:false, ephemeral:false, required:false, purposes:[]},
-      approximate_location: {label:'Approximate location', collected:false, shared:false, ephemeral:false, required:false, purposes:[]},
-      photos: {label:'Photos', collected:false, shared:false, ephemeral:false, required:false, purposes:[]},
-      videos: {label:'Videos', collected:false, shared:false, ephemeral:false, required:false, purposes:[]},
-      address: {label:'Address', collected:false, shared:false, ephemeral:false, required:false, purposes:[]},
-      contact: {label:'Contact info', collected:false, shared:false, ephemeral:false, required:false, purposes:[]},
-      user_payment_info: {label:'User payment info', collected:false, shared:false, ephemeral:false, required:false, purposes:[]}
+    // --- DATA STORE ---
+    const dataTypeMeta = {
+        approx_location: { label: 'Approximate location', collected: true, shared: true, ephemeral: false, optional: true, purposes: ['Advertising or marketing', 'Analytics'] },
+        precise_location: { label: 'Precise location', collected: true, shared: true, ephemeral: false, optional: true, purposes: ['App functionality', 'Analytics'] },
+        name: { label: 'Name', collected: true, shared: true, ephemeral: false, optional: false, purposes: ['App functionality', 'Developer communications'] },
+        email_address: { label: 'Email address', collected: true, shared: true, ephemeral: false, optional: false, purposes: ['App functionality', 'Account management'] },
+        user_ids: { label: 'User IDs', collected: true, shared: true, ephemeral: false, optional: false, purposes: ['Advertising or marketing', 'Analytics', 'App functionality'] },
+        address: { label: 'Address', collected: true, shared: true, ephemeral: false, optional: false, purposes: ['App functionality'] },
+        phone_number: { label: 'Phone number', collected: true, shared: true, ephemeral: false, optional: false, purposes: ['App functionality', 'Account management'] },
+        purchase_history: { label: 'Purchase history', collected: true, shared: true, ephemeral: false, optional: false, purposes: ['Advertising or marketing', 'Analytics', 'App functionality'] },
+        other_financial_info: { label: 'Other financial info', collected: true, shared: true, ephemeral: false, optional: false, purposes: ['App functionality', 'Fraud prevention, security, and compliance'] },
+        app_interactions: { label: 'App interactions', collected: true, shared: true, ephemeral: false, optional: true, purposes: ['Advertising or marketing', 'Analytics', 'Personalization'] },
+        in_app_search_history: { label: 'In-app search history', collected: true, shared: false, ephemeral: false, optional: true, purposes: ['Analytics', 'Personalization'] },
+        installed_apps: { label: 'Installed apps', collected: true, shared: true, ephemeral: false, optional: true, purposes: ['Advertising or marketing', 'Fraud prevention, security, and compliance'] },
+        crash_logs: { label: 'Crash logs', collected: true, shared: true, ephemeral: false, optional: true, purposes: ['Analytics'] },
+        diagnostics: { label: 'Diagnostics', collected: true, shared: true, ephemeral: false, optional: true, purposes: ['Analytics'] },
+        other_app_performance_data: { label: 'Other app performance data', collected: true, shared: true, ephemeral: false, optional: true, purposes: ['Analytics'] },
+        device_or_other_ids: { label: 'Device or other IDs', collected: true, shared: true, ephemeral: false, optional: true, purposes: ['Advertising or marketing', 'Analytics', 'App functionality'] },
     };
 
-    const sdkMapping = { /* same as before */
-      unity_ads: ['user_ids','other_info','app_activity','app_interactions','crash_logs','diagnostics','device_ids'],
-      admob: ['user_ids','other_info','app_activity','app_interactions','other_actions','device_ids'],
-      crashlytics: ['crash_logs','app_interactions','user_ids'],
-      facebook_login: ['user_ids','device_ids'],
-      facebook_analytics: ['user_ids','purchase_history','app_interactions','in_app_search_history','other_info','address','contact'],
-      flurry: ['device_ids','app_interactions'],
-      intercom: ['email_address','approximate_location','photos','videos','other_actions'],
-      mixpanel: ['user_ids','device_ids','app_interactions','other_actions'],
-      stripe: ['user_ids','app_interactions','user_payment_info'],
-      iap: ['purchase_history']
+    const sdkMapping = {
+        adcolony: { name: 'AdColony SDK', types: ['approx_location', 'app_interactions', 'diagnostics', 'device_or_other_ids'] },
+        adjust: { name: 'Adjust SDK', types: ['user_ids', 'app_interactions', 'diagnostics', 'device_or_other_ids'] },
+        admob: { name: 'Google AdMob', types: ['approx_location', 'app_interactions', 'crash_logs', 'diagnostics', 'device_or_other_ids'] },
+        amazon_publisher: { name: 'Amazon Publisher Services', types: ['approx_location', 'app_interactions', 'diagnostics', 'device_or_other_ids'] },
+        applovin: { name: 'AppLovin SDK', types: ['approx_location', 'user_ids', 'app_interactions', 'diagnostics', 'device_or_other_ids'] },
+        appsflyer: { name: 'AppsFlyer SDK', types: ['user_ids', 'purchase_history', 'app_interactions', 'crash_logs', 'device_or_other_ids'] },
+        bugsnag: { name: 'Bugsnag', types: ['user_ids', 'crash_logs', 'diagnostics', 'device_or_other_ids'] },
+        chartboost: { name: 'Chartboost SDK', types: ['approx_location', 'user_ids', 'app_interactions', 'diagnostics', 'device_or_other_ids'] },
+        facebook_an: { name: 'Facebook Audience Network', types: ['approx_location', 'user_ids', 'purchase_history', 'app_interactions', 'installed_apps', 'crash_logs', 'diagnostics', 'device_or_other_ids'] },
+        facebook_login: { name: 'Facebook Login', types: ['name', 'email_address', 'user_ids'] },
+        firebase_analytics: { name: 'Firebase Analytics', types: ['approx_location', 'user_ids', 'purchase_history', 'app_interactions', 'crash_logs', 'diagnostics', 'device_or_other_ids'] },
+        firebase_auth: { name: 'Firebase Authentication', types: ['name', 'email_address', 'user_ids', 'phone_number'] },
+        firebase_crashlytics: { name: 'Firebase Crashlytics', types: ['user_ids', 'crash_logs', 'diagnostics', 'device_or_other_ids'] },
+        firebase_db: { name: 'Firebase Realtime DB', types: ['user_ids', 'other_financial_info', 'app_interactions'] },
+        flurry: { name: 'Flurry Analytics', types: ['precise_location', 'user_ids', 'purchase_history', 'app_interactions', 'crash_logs', 'diagnostics', 'device_or_other_ids'] },
+        google_ad_manager: { name: 'Google Ad Manager', types: ['approx_location', 'app_interactions', 'crash_logs', 'diagnostics', 'device_or_other_ids'] },
+        google_billing: { name: 'Google Play Billing', types: ['name', 'email_address', 'user_ids', 'address', 'phone_number', 'purchase_history'] },
+        google_play_games: { name: 'Google Play Games', types: ['name', 'email_address', 'user_ids', 'app_interactions'] },
+        google_signin: { name: 'Google Sign-In', types: ['name', 'email_address', 'user_ids'] },
+        inmobi: { name: 'InMobi SDK', types: ['precise_location', 'user_ids', 'app_interactions', 'device_or_other_ids'] },
+        intercom: { name: 'Intercom', types: ['name', 'email_address', 'user_ids', 'phone_number', 'app_interactions', 'crash_logs', 'device_or_other_ids'] },
+        ironsource: { name: 'ironSource', types: ['approx_location', 'user_ids', 'app_interactions', 'diagnostics', 'device_or_other_ids'] },
+        leanplum: { name: 'Leanplum', types: ['precise_location', 'name', 'email_address', 'user_ids', 'purchase_history', 'app_interactions', 'crash_logs', 'diagnostics', 'device_or_other_ids'] },
+        mapbox: { name: 'Mapbox', types: ['precise_location', 'app_interactions', 'diagnostics', 'device_or_other_ids'] },
+        mintegral: { name: 'Mintegral', types: ['precise_location', 'user_ids', 'app_interactions', 'diagnostics', 'device_or_other_ids'] },
+        mixpanel: { name: 'Mixpanel', types: ['precise_location', 'name', 'email_address', 'user_ids', 'phone_number', 'purchase_history', 'app_interactions', 'device_or_other_ids'] },
+        onesignal: { name: 'OneSignal', types: ['precise_location', 'name', 'email_address', 'user_ids', 'phone_number', 'purchase_history', 'app_interactions', 'diagnostics', 'device_or_other_ids'] },
+        pangle: { name: 'Pangle SDK', types: ['approx_location', 'user_ids', 'purchase_history', 'app_interactions', 'crash_logs', 'diagnostics', 'device_or_other_ids'] },
+        segment: { name: 'Segment', types: ['precise_location', 'name', 'email_address', 'user_ids', 'address', 'phone_number', 'purchase_history', 'app_interactions', 'device_or_other_ids'] },
+        sentry: { name: 'Sentry', types: ['user_ids', 'crash_logs', 'diagnostics', 'device_or_other_ids'] },
+        singular: { name: 'Singular', types: ['user_ids', 'purchase_history', 'app_interactions', 'diagnostics', 'device_or_other_ids'] },
+        stripe: { name: 'Stripe', types: ['precise_location', 'name', 'email_address', 'user_ids', 'address', 'phone_number', 'purchase_history', 'other_financial_info', 'device_or_other_ids'] },
+        tapjoy: { name: 'Tapjoy', types: ['precise_location', 'user_ids', 'app_interactions', 'installed_apps', 'device_or_other_ids'] },
+        unity_ads: { name: 'Unity Ads', types: ['approx_location', 'user_ids', 'purchase_history', 'app_interactions', 'crash_logs', 'diagnostics', 'device_or_other_ids'] },
+        vungle: { name: 'Vungle', types: ['precise_location', 'user_ids', 'app_interactions', 'installed_apps', 'crash_logs', 'diagnostics', 'device_or_other_ids'] }
     };
 
-    function buildTable() {
-      const selected = Array.from(document.querySelectorAll('.service-checkbox:checked')).map(cb=>cb.value);
-      if(!selected.length) return;
-      const types = new Set();
-      selected.forEach(s=>sdkMapping[s]?.forEach(t=>types.add(t)));
-      const tbody = document.getElementById('questionForm'); tbody.innerHTML = '';
-      types.forEach(key=>{
-        const m = dataTypeMeta[key]; if(!m) return;
-        const tr = document.createElement('tr');
-        tr.className='bg-white hover:bg-gray-50';
-        const vals = [m.label, m.collected, m.shared, m.ephemeral, m.required, m.purposes.join(', ')];
-        vals.forEach((v,i)=>{
-          const td = document.createElement('td'); td.className='border px-4 py-2 text-center';
-          if(i>0 && typeof v=== 'boolean') {
-            const cb = document.createElement('input'); cb.type='checkbox'; cb.disabled=true; cb.checked=v; td.appendChild(cb);
-          } else td.textContent=v;
-          if(i===0) td.className='border px-4 py-2 text-left';
-          tr.appendChild(td);
+    // --- APPLICATION LOGIC ---
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const step1 = document.getElementById('step1');
+      const step2 = document.getElementById('step2');
+      const toStep2Btn = document.getElementById('toStep2');
+      const backToStep1Btn = document.getElementById('backToStep1');
+      const exportCsvBtn = document.getElementById('exportCsv');
+      const exportPdfBtn = document.getElementById('exportPdf');
+      const sdkGrid = document.getElementById('sdk-selection-grid');
+      const themeToggle = document.getElementById('theme-toggle');
+      const lightIcon = document.getElementById('theme-icon-light');
+      const darkIcon = document.getElementById('theme-icon-dark');
+
+      // --- Theme Toggler ---
+      function updateThemeIcon() {
+          if (document.documentElement.classList.contains('dark')) {
+              lightIcon.classList.remove('hidden');
+              darkIcon.classList.add('hidden');
+          } else {
+              lightIcon.classList.add('hidden');
+              darkIcon.classList.remove('hidden');
+          }
+      }
+      updateThemeIcon(); // Set initial icon state
+      
+      themeToggle.addEventListener('click', () => {
+          document.documentElement.classList.toggle('dark');
+          localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+          updateThemeIcon();
+      });
+
+      // --- Populate SDK Checkboxes ---
+      const sortedSdkKeys = Object.keys(sdkMapping).sort((a, b) => sdkMapping[a].name.localeCompare(sdkMapping[b].name));
+      sortedSdkKeys.forEach(key => {
+        const sdk = sdkMapping[key];
+        const label = document.createElement('label');
+        label.className = 'flex items-center space-x-2 p-2 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors';
+        label.innerHTML = `
+          <input type="checkbox" class="service-checkbox juicy-checkbox h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-700 dark:checked:bg-blue-500 transition-all" value="${key}" />
+          <span class="text-sm text-gray-700 dark:text-gray-300">${sdk.name}</span>
+        `;
+        sdkGrid.appendChild(label);
+      });
+
+      // --- Main App Logic ---
+      function buildTable() {
+        const selectedServices = Array.from(document.querySelectorAll('.service-checkbox:checked')).map(cb => cb.value);
+        const tbody = document.getElementById('questionForm');
+        tbody.innerHTML = '';
+
+        if (selectedServices.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center p-8 text-gray-500 dark:text-gray-400">No SDKs selected. Go back and select at least one to see the report.</td></tr>`;
+            return;
+        }
+
+        const uniqueDataTypes = new Set();
+        selectedServices.forEach(serviceKey => {
+          sdkMapping[serviceKey]?.types.forEach(dataTypeKey => { uniqueDataTypes.add(dataTypeKey); });
         });
-        tbody.appendChild(tr);
+        
+        const sortedDataTypes = Array.from(uniqueDataTypes).sort((a, b) => dataTypeMeta[a].label.localeCompare(dataTypeMeta[b].label));
+
+        sortedDataTypes.forEach(key => {
+          const meta = dataTypeMeta[key];
+          if (!meta) return;
+
+          const tr = document.createElement('tr');
+          tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-700/50';
+
+          tr.innerHTML += `<td class="px-4 py-3 text-left font-medium text-gray-800 dark:text-gray-200">${meta.label}</td>`;
+
+          ['collected', 'shared', 'ephemeral', 'optional'].forEach(prop => {
+              const td = document.createElement('td');
+              td.className = 'px-4 py-3 text-center';
+              const icon = meta[prop] 
+                  ? `<svg class="w-5 h-5 mx-auto text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>` 
+                  : `<svg class="w-5 h-5 mx-auto text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>`;
+              td.innerHTML = icon;
+              tr.appendChild(td);
+          });
+
+          tr.innerHTML += `<td class="px-4 py-3 text-left text-gray-600 dark:text-gray-400">${meta.purposes.join(', ')}</td>`;
+          tbody.appendChild(tr);
+        });
+      }
+      
+      function downloadFile(content, fileName, mimeType) {
+        const a = document.createElement('a');
+        const blob = new Blob([content], { type: mimeType });
+        a.href = URL.createObjectURL(blob);
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+      
+      function generateCsv() {
+        const headers = ['Data Type', 'Collected', 'Shared', 'Processed Ephemerally', 'Data collection is optional', 'Purposes'];
+        let csvContent = headers.join(',') + '\n';
+        
+        const rows = document.querySelectorAll('#questionForm tr');
+        rows.forEach(row => {
+            if (row.querySelector('td').colSpan === 6) return;
+            const cells = Array.from(row.querySelectorAll('td'));
+            const rowData = [
+                `"${cells[0].textContent}"`,
+                cells[1].innerHTML.includes('text-green-500') ? 'Yes' : 'No',
+                cells[2].innerHTML.includes('text-green-500') ? 'Yes' : 'No',
+                cells[3].innerHTML.includes('text-green-500') ? 'Yes' : 'No',
+                cells[4].innerHTML.includes('text-green-500') ? 'Yes' : 'No',
+                `"${cells[5].textContent}"`
+            ];
+            csvContent += rowData.join(',') + '\n';
+        });
+        
+        downloadFile(csvContent, 'data_safety_report.csv', 'text/csv;charset=utf-8;');
+      }
+
+      function generatePdf() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const isDark = document.documentElement.classList.contains('dark');
+        
+        doc.text("Data Safety Report", 14, 16);
+        
+        const table = document.getElementById('resultsTable');
+        if (table.querySelector('#questionForm td[colspan="6"]')) {
+            doc.text("No SDKs selected.", 14, 25);
+        } else {
+             doc.autoTable({
+                html: '#resultsTable',
+                startY: 22,
+                theme: 'grid',
+                headStyles: { fillColor: isDark ? [45, 55, 72] : [243, 244, 246] },
+                styles: {
+                    textColor: isDark ? [229, 231, 235] : [17, 24, 39],
+                    cellPadding: 2,
+                    fontSize: 8
+                },
+                bodyStyles: {
+                    fillColor: isDark ? [31, 41, 55] : [255, 255, 255]
+                }
+             });
+        }
+       
+        doc.save('data_safety_report.pdf');
+      }
+
+      toStep2Btn.addEventListener('click', () => {
+        buildTable();
+        step1.classList.add('hidden');
+        step2.classList.remove('hidden');
       });
-    }
-
-    document.getElementById('toStep2').addEventListener('click', () => {
-      if(!document.querySelectorAll('.service-checkbox:checked').length) return alert('Select at least one SDK');
-      buildTable();
-      document.getElementById('step1').classList.add('hidden');
-      document.getElementById('step2').classList.remove('hidden');
-    });
-
-    document.getElementById('generate').addEventListener('click', ()=>{
-      document.getElementById('output').textContent = JSON.stringify(
-        Array.from(document.querySelectorAll('#questionForm tr')).map(tr=>{
-          const [lbl, col, sha, eph, req, purp] = tr.querySelectorAll('td');
-          return { dataType: lbl.textContent, collected: col.querySelector('input').checked, shared: sha.querySelector('input').checked, processedEphemerally: eph.querySelector('input').checked, required: req.querySelector('input').checked, purposes: purp.textContent.split(', ').filter(p=>p)};
-        })
-      ,null,2);
-      document.getElementById('step3').classList.remove('hidden');
-    });
-
-    // CSV Export
-    document.getElementById('exportCsv').addEventListener('click', ()=>{
-      const rows = document.querySelectorAll('#questionForm tr');
-      const csv = ['Data Type,Collected,Shared,Processed Ephemerally,Required,Purposes'];
-      rows.forEach(tr=>{
-        const cells = tr.querySelectorAll('td');
-        const row = [cells[0].textContent, cells[1].querySelector('input').checked, cells[2].querySelector('input').checked, cells[3].querySelector('input').checked, cells[4].querySelector('input').checked, cells[5].textContent];
-        csv.push(row.join(','));
+      
+      backToStep1Btn.addEventListener('click', () => {
+        step2.classList.add('hidden');
+        step1.classList.remove('hidden');
       });
-      const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href=url; a.download='data_safety.csv'; a.click(); URL.revokeObjectURL(url);
-    });
 
-    // PDF Export
-    document.getElementById('exportPdf').addEventListener('click', async ()=>{
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      let y=10;
-      doc.setFontSize(12);
-      document.querySelectorAll('#questionForm tr').forEach(tr=>{
-        const cells = tr.querySelectorAll('td');
-        const line = `${cells[0].textContent}: Collected=${cells[1].querySelector('input').checked}, Shared=${cells[2].querySelector('input').checked}, Ephemeral=${cells[3].querySelector('input').checked}, Required=${cells[4].querySelector('input').checked}, Purposes=${cells[5].textContent}`;
-        doc.text(line, 10, y); y+=8;
-      });
-      doc.save('data_safety.pdf');
+      exportCsvBtn.addEventListener('click', generateCsv);
+      exportPdfBtn.addEventListener('click', generatePdf);
+
     });
   </script>
 </body>
+
 </html>
